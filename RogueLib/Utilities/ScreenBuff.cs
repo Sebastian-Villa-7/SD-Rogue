@@ -74,6 +74,19 @@ public class ScreenBuff : IRenderWindow
     // Call Display() to write the back buffer to the screen.
     public void Display() => FlushToScreen();
 
+    // Clear the back buffer at the start of each frame
+    public void ClearBackBuffer()
+    {
+        for (int y = 0; y < _height; y++)
+        {
+            for (int x = 0; x < _width; x++)
+            {
+                _back[x, y] = '\0';  // Clear to null character
+                _backColor[x, y] = _notAColor;  // Reset color to sentinel
+            }
+        }
+    }
+
     // ==============================================================
     //            private implementation methods
     // ==============================================================
@@ -130,12 +143,21 @@ public class ScreenBuff : IRenderWindow
                 // Something changed — pay the cost of positioning + writing
                 Console.SetCursorPosition(x, y);
                 var saveColor = Console.ForegroundColor;
-                Console.ForegroundColor = _backColor[x, y];
-                Console.Write(_back[x, y]);
+
+                // Determine what character to write
+                char charToWrite = _back[x, y];
+                if (charToWrite == '\0')
+                    charToWrite = ' ';  // Write space for cleared cells
+
+                // Only set color if it's not the sentinel value
+                if (_backColor[x, y] != _notAColor)
+                    Console.ForegroundColor = _backColor[x, y];
+
+                Console.Write(charToWrite);
                 Console.ForegroundColor = saveColor;
 
                 // Record what is now on screen
-                _front[x, y] = _back[x, y];
+                _front[x, y] = charToWrite;
                 _frontColor[x, y] = _backColor[x, y];
             }
         }
