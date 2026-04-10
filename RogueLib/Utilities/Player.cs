@@ -28,10 +28,16 @@ public abstract class Player : IActor, IDrawable
         Pos = Vector2.Zero;
     }
 
-    public string HUD =>
+    public virtual string HUD =>
        $"Level:{_level}  Gold: {_gold}    Hp: {_hp}({_maxHp})" +
        $"  Str: {_str}({_maxStr})" +
        $"  Arm: {_arm}   Exp: {_exp}/{10} Turn: {_turn}";
+
+    public int Gold
+    {
+        get => _gold;
+        set => _gold = value;
+    }
 
 
     public virtual void Update()

@@ -67,7 +67,7 @@ public class Level : Scene
         for (int i = 0; i < hm; i++)
         {
             var pos = _floor.ElementAt(rng.Next(_floor.Count));
-            _item.Add(new Gold(pos, rng.Next(100, 200)));
+            _item.Add(new Gold(pos, rng.Next(1, 10)));
         }
     }
 
@@ -147,7 +147,7 @@ public class Level : Scene
         {
             if (_discovered.Contains(item.Pos))
             {
-
+                item.Draw(disp);
             }
         }
     }
@@ -228,6 +228,23 @@ public class Level : Scene
 
         if (_walkables.Contains(newPos))
         {
+            Gold? goldHere = null;
+            foreach (var item in _item)
+            {
+                if (item is Gold g && g.Pos == newPos)
+                {
+                    goldHere = g;
+                    break;
+                }
+            }
+
+            if (goldHere != null)
+            {
+                if (_player is Rogue rogue)
+                    rogue.Gold += goldHere.Amount;
+                _item.Remove(goldHere);
+            }
+
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
             _walkables.Remove(newPos); // new tile is now occupied
