@@ -19,6 +19,11 @@ public class Game
     public const int height = 25;
 
     protected Scene? _currentLevel;
+    public Scene? CurrentLevel
+    {
+        get => _currentLevel;
+        set => _currentLevel = value;
+    }
     protected bool _isQuit;
     protected IRenderWindow? _window;
     protected Player? _player;
@@ -34,11 +39,12 @@ public class Game
         while (_currentLevel!.IsActive)
         {
             // ---------------
-            // draw the level 
+            // clear and draw the level 
             // ---------------
             if (_window is null)
                 throw new Exception("Game window not initialized");
 
+            _window.ClearBackBuffer();  // Clear the back buffer before drawing
             _currentLevel!.Draw(_window);
             _window!.Display();
 

@@ -96,12 +96,11 @@ public class Level : Scene
 
     public override void Draw(IRenderWindow? disp)
     {
-        // using custom RenderWindow, cast to my RenderWindow
-        var tilesToDraw = new TileSet(_decor);
-        tilesToDraw.IntersectWith(_discovered);
-        tilesToDraw.UnionWith(_inFov);
+        // Draw all discovered tiles in dark gray
+        disp.fDraw(_discovered, _map, ConsoleColor.DarkGray);
 
-        disp.fDraw(tilesToDraw, _map, ConsoleColor.Gray);
+        // Draw current FOV tiles in bright gray on top (painter's algorithm)
+        disp.fDraw(_inFov, _map, ConsoleColor.Gray);
 
         var rng = new Random();
         if (_player.Turn % 5 == 0)
@@ -132,7 +131,13 @@ public class Level : Scene
         else if (command.Name == "right")
         {
             MovePlayer(Vector2.E);
-        } // game ctl      
+        }
+        else if (command.Name == "help")
+        {
+            // Switch to help scene
+            var helpScene = new HelpScene(_game!, this);
+            _game!.CurrentLevel = helpScene;
+        }
         else if (command.Name == "quit")
         {
             _levelActive = false;
@@ -204,20 +209,17 @@ public class Level : Scene
     {
         RegisterCommand(ConsoleKey.UpArrow, "up");
         RegisterCommand(ConsoleKey.W, "up");
-        RegisterCommand(ConsoleKey.K, "up");
 
         RegisterCommand(ConsoleKey.DownArrow, "down");
         RegisterCommand(ConsoleKey.S, "down");
-        RegisterCommand(ConsoleKey.J, "down");
 
         RegisterCommand(ConsoleKey.LeftArrow, "left");
         RegisterCommand(ConsoleKey.A, "left");
-        RegisterCommand(ConsoleKey.H, "left");
 
         RegisterCommand(ConsoleKey.RightArrow, "right");
         RegisterCommand(ConsoleKey.D, "right");
-        RegisterCommand(ConsoleKey.L, "right");
 
+        RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
     }
 
