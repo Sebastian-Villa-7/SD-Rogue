@@ -1,3 +1,5 @@
+using RogueLib.Utilities;
+
 namespace RlGameNS;
 
 public class Rogue : Player

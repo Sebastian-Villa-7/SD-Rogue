@@ -1,8 +1,6 @@
-﻿using RogueLib.Dungeon;
+﻿using System;
+using RogueLib.Dungeon;
 using RogueLib.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SandBox01.Levels
 {
@@ -12,8 +10,9 @@ namespace SandBox01.Levels
 
         public Gold(Vector2 pos, int amount) : base('*', pos)
         {
-
+            Amount = amount;
         }
+
         public override void Draw(IRenderWindow disp)
         {
             disp.Draw(Glyph, Pos, ConsoleColor.Yellow);

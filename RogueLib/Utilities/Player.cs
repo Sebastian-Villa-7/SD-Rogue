@@ -1,5 +1,7 @@
+using System;
 using RogueLib.Dungeon;
-using RogueLib.Utilities;
+
+namespace RogueLib.Utilities;
 
 public abstract class Player : IActor, IDrawable
 {
