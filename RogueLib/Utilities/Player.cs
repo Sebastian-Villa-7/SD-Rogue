@@ -21,6 +21,14 @@ public abstract class Player : IActor, IDrawable
     protected int _turn = 0;
 
     public int Turn => _turn;
+    public virtual int Strength => _str;
+    public virtual int Armor => _arm;
+
+    public int Gold
+    {
+        get => _gold;
+        set => _gold = value;
+    }
 
     public Player()
     {
@@ -29,16 +37,9 @@ public abstract class Player : IActor, IDrawable
     }
 
     public virtual string HUD =>
-       $"Level:{_level}  Gold: {_gold}    Hp: {_hp}({_maxHp})" +
-       $"  Str: {_str}({_maxStr})" +
-       $"  Arm: {_arm}   Exp: {_exp}/{10} Turn: {_turn}";
-
-    public int Gold
-    {
-        get => _gold;
-        set => _gold = value;
-    }
-
+       $"Level:{_level}  Gold: {_gold}  Hp: {_hp}({_maxHp})" +
+       $"  Str: {Strength}({_maxStr})" +
+       $"  Arm: {Armor}   Exp: {_exp}/{10} Turn: {_turn}";
 
     public virtual void Update()
     {

@@ -1,10 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Utilities;
 using SandBox01.Levels;
+using SandBox01.Levels.Potions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace RlGameNS;
@@ -58,6 +59,7 @@ public class Level : Scene
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
+        spreadPotions();
     }
 
     private void spreadGold()
@@ -68,6 +70,35 @@ public class Level : Scene
         {
             var pos = _floor.ElementAt(rng.Next(_floor.Count));
             _item.Add(new Gold(pos, rng.Next(1, 10)));
+        }
+    }
+
+    private void spreadPotions()
+    {
+        var rng = new Random();
+        var hm = rng.Next(5, 10);  
+        var validFloorTiles = _floor.ToList();
+
+        for (int i = 0; i < hm && validFloorTiles.Any(); i++)
+        {
+            var pos = validFloorTiles[rng.Next(validFloorTiles.Count)];
+
+            // Randomly choose potion type
+            int potionType = rng.Next(2);  // 0 = Strength, 1 = Shield
+
+            Potion potion;
+            if (potionType == 0)
+            {
+                // Strength potion: bonus 3-8, duration 15-30 turns
+                potion = new StrengthPotion(pos, rng.Next(3, 8), rng.Next(15, 30));
+            }
+            else
+            {
+                // Shield potion: bonus 2-5, duration 15-30 turns
+                potion = new ArmourPotion(pos, rng.Next(2, 5), rng.Next(15, 30));
+            }
+
+            _item.Add(potion);
         }
     }
 
@@ -228,21 +259,30 @@ public class Level : Scene
 
         if (_walkables.Contains(newPos))
         {
-            Gold? goldHere = null;
+            Item? itemHere = null;
             foreach (var item in _item)
             {
-                if (item is Gold g && g.Pos == newPos)
+                if (item.Pos == newPos)
                 {
-                    goldHere = g;
+                    itemHere = item;
                     break;
                 }
             }
 
-            if (goldHere != null)
+            if (itemHere != null)
             {
-                if (_player is Rogue rogue)
-                    rogue.Gold += goldHere.Amount;
-                _item.Remove(goldHere);
+                if (itemHere is Gold gold)
+                {
+                    if (_player is Rogue rogue)
+                        _player.Gold += gold.Amount;
+                }
+                else if (itemHere is Potion potion)
+                {
+                    if (_player is Rogue rogue)
+                        potion.ApplyEffect(rogue);
+                }
+
+                _item.Remove(itemHere);
             }
 
             var oldPos = _player!.Pos;

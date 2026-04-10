@@ -1,6 +1,7 @@
 using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Utilities;
+using SandBox01.Levels;
 
 namespace RlGameNS;
 
