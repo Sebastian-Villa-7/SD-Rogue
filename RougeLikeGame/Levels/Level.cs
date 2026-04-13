@@ -30,6 +30,7 @@ namespace RlGameNS;
 public class Level : Scene
 {
     // ---- level config ---- 
+    protected int _levelDepth = 1;
     protected string? _map;
     protected int _senseRadius = 4;
 
@@ -47,27 +48,48 @@ public class Level : Scene
     protected List<Enemy> _enemies;
     private Combat _combat;
 
-    public Level(Player p, string map, Game game)
+    public Level(Player p, Game game, int depth = 1) 
+        : this(p, DungeonLayoutManager.GetRandomLayout(), game, depth)
+    {
+
+    }
+     public Level(Player p, string map, Game game, int depth = 1)
     {
         if (game == null || p == null || map == null)
             throw new ArgumentNullException("game, player, or map cannot be null");
 
         _player = p;
-        _player.Pos = new Vector2(4, 12);
         _map = map;
         _game = game;
         _item = new List<Item>();
+        _levelDepth = depth;
 
         initMapTileSets(map);
+
+        _player.Pos = _floor.ElementAt(new Random().Next(_floor.Count));
+
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
         spreadPotions();
         spreadWeapons();
+        spreadStairs();
 
         _enemies = new List<Enemy>();
         _combat = new Combat();
         spawnEnemies();
+    }
+
+    private void spreadStairs()
+    {
+        var rng = new Random();
+        Vector2 pos;
+        do
+        {
+            pos = _floor.ElementAt(rng.Next(_floor.Count));
+        } while (pos == _player.Pos);  // Don't spawn on player
+
+        _item.Add(new Stairs(pos));
     }
 
     private void spreadGold()
@@ -213,7 +235,7 @@ public class Level : Scene
 
         drawItems(disp);
         drawEnemies(disp);
-        disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+        disp.Draw(_player.HUD, new Vector2(0, 39), ConsoleColor.Green);
 
     }
 
@@ -236,6 +258,11 @@ public class Level : Scene
         }
         else if (command.Name == "quit")
             _levelActive = false;
+        else if (command.Name == "descend")
+        {
+            var nextLevel = new Level(_player, _game, _levelDepth + 1);
+            _game!.CurrentLevel = nextLevel;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -293,6 +320,7 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.R, "rest");
         RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
+        RegisterCommand(ConsoleKey.OemPeriod, "descend");
     }
 
     public void MovePlayer(Vector2 delta)
@@ -343,7 +371,13 @@ public class Level : Scene
                         MessageLog.Add($"You picked up {weapon.Name}!");
                     }
                 }
-
+                else if (itemHere is Stairs)  // ← Add this
+                {
+                    MessageLog.Add("You descend deeper into the dungeon...");
+                    var nextLevel = new Level(_player, _game, _levelDepth + 1);
+                    _game!.CurrentLevel = nextLevel;
+                    return;
+                }
                 _item.Remove(itemHere);
             }
 

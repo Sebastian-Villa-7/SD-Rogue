@@ -163,6 +163,6 @@ public class ScreenBuff : IRenderWindow
         }
 
         Console.ResetColor();
-        Console.SetCursorPosition(0, _height);
+        Console.SetCursorPosition(0, _height - 1);
     }
 }
