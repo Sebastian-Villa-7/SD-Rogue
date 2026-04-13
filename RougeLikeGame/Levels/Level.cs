@@ -59,22 +59,37 @@ public class Level : Scene
             throw new ArgumentNullException("game, player, or map cannot be null");
 
         _player = p;
-        _player.Pos = new Vector2(4, 12);
         _map = map;
         _game = game;
         _item = new List<Item>();
         _levelDepth = depth;
 
         initMapTileSets(map);
+
+        _player.Pos = _floor.ElementAt(new Random().Next(_floor.Count));
+
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
         spreadPotions();
         spreadWeapons();
+        spreadStairs();
 
         _enemies = new List<Enemy>();
         _combat = new Combat();
         spawnEnemies();
+    }
+
+    private void spreadStairs()
+    {
+        var rng = new Random();
+        Vector2 pos;
+        do
+        {
+            pos = _floor.ElementAt(rng.Next(_floor.Count));
+        } while (pos == _player.Pos);  // Don't spawn on player
+
+        _item.Add(new Stairs(pos));
     }
 
     private void spreadGold()
@@ -356,7 +371,13 @@ public class Level : Scene
                         MessageLog.Add($"You picked up {weapon.Name}!");
                     }
                 }
-
+                else if (itemHere is Stairs)  // ← Add this
+                {
+                    MessageLog.Add("You descend deeper into the dungeon...");
+                    var nextLevel = new Level(_player, _game, _levelDepth + 1);
+                    _game!.CurrentLevel = nextLevel;
+                    return;
+                }
                 _item.Remove(itemHere);
             }
 
