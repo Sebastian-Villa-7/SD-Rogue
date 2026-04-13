@@ -2,20 +2,19 @@
 using RogueLib.Dungeon;
 using RogueLib.Utilities;
 
-namespace SandBox01.Levels
+namespace SandBox01.Levels;
+
+public class Gold : Item
 {
-    internal class Gold : Item
+    public int Amount { get; set; }
+
+    public Gold(Vector2 pos, int amount) : base('*', pos)
     {
-        public int Amount { get; set; }
+        Amount = amount;
+    }
 
-        public Gold(Vector2 pos, int amount) : base('*', pos)
-        {
-            Amount = amount;
-        }
-
-        public override void Draw(IRenderWindow disp)
-        {
-            disp.Draw(Glyph, Pos, ConsoleColor.Yellow);
-        }
+    public override void Draw(IRenderWindow disp)
+    {
+        disp.Draw(Glyph, Pos, ConsoleColor.Yellow);
     }
 }

@@ -1,10 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Utilities;
 using SandBox01.Levels;
+using SandBox01.Levels.Potions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace RlGameNS;
@@ -58,6 +59,7 @@ public class Level : Scene
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
+        spreadPotions();
     }
 
     private void spreadGold()
@@ -67,7 +69,38 @@ public class Level : Scene
         for (int i = 0; i < hm; i++)
         {
             var pos = _floor.ElementAt(rng.Next(_floor.Count));
-            _item.Add(new Gold(pos, rng.Next(100, 200)));
+            _item.Add(new Gold(pos, rng.Next(1, 10)));
+        }
+    }
+
+    private void spreadPotions()
+    {
+        var rng = new Random();
+        var hm = rng.Next(5, 10);  
+        var validFloorTiles = _floor.ToList();
+
+        for (int i = 0; i < hm && validFloorTiles.Any(); i++)
+        {
+            var pos = validFloorTiles[rng.Next(validFloorTiles.Count)];
+
+            // Randomly choose potion type
+            int potionType = rng.Next(3);  // 0 = Strength, 1 = Shield, 2 = HP
+
+            Potion potion;
+            switch (potionType)
+            {
+                case 0:
+                    potion = new StrengthPotion(pos, rng.Next(3, 8), rng.Next(15, 30));
+                    break;
+                case 1:
+                    potion = new ArmourPotion(pos, rng.Next(2, 5), rng.Next(15, 30));
+                    break;
+                default:
+                    potion = new HealthPotion(pos, rng.Next(5, 15));
+                    break;
+            }
+
+            _item.Add(potion);
         }
     }
 
@@ -152,7 +185,7 @@ public class Level : Scene
         {
             if (_discovered.Contains(item.Pos))
             {
-
+                item.Draw(disp);
             }
         }
     }
@@ -230,6 +263,32 @@ public class Level : Scene
 
         if (_walkables.Contains(newPos))
         {
+            Item? itemHere = null;
+            foreach (var item in _item)
+            {
+                if (item.Pos == newPos)
+                {
+                    itemHere = item;
+                    break;
+                }
+            }
+
+            if (itemHere != null)
+            {
+                if (itemHere is Gold gold)
+                {
+                    if (_player is Rogue rogue)
+                        _player.Gold += gold.Amount;
+                }
+                else if (itemHere is Potion potion)
+                {
+                    if (_player is Rogue rogue)
+                        potion.ApplyEffect(rogue);
+                }
+
+                _item.Remove(itemHere);
+            }
+
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
             _walkables.Remove(newPos); // new tile is now occupied
