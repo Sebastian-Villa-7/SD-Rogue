@@ -11,32 +11,36 @@ public class HelpScene : Scene
     private Scene? _previousScene;  // Reference to the level we came from
     private Game? _game;
 
-    private string _helpText = """
-          MOVEMENT:                                                                   
-            Arrow Keys / WASD  - Move in cardinal directions                              
-                                                                                      
-          COMMANDS:                                                                   
-            H            - Show this help screen                                      
-            R            - Rest (press 5 times to recover 1 HP)                        
-            Q            - Quit the game                                              
-                                                                                      
-          OBJECTIVE: Navigate the dungeon, collect gold, and survive!                          
-            Avoid enemies and find your way deeper into the depths.                   
-                                                                                      
-          SYMBOLS:                                                                    
-            @            - You (the player)                                           
-            *            - Gold                                                       
-            g            - Goblin (weak, fast)                                        
-            o            - Orc (medium, chases when close)                            
-            T            - Troll (slow, always chases)                                
-            .            - Floor (walkable)                                           
-            #            - Tunnel (walkable)                                          
-            +            - Door (walkable)                                            
-            | - / walls  - Walls (not walkable)                                       
-                                                                                      
-          Press H or ESCAPE to return to the game...                                  
-        
-        """;
+    private string _helpText = """"
+        ╔═════════════════════════════════════════════════════════════════════╗
+        ║                         ROGUE HELP MANUAL                           ║
+        ║  MOVEMENT:                                                          ║
+        ║    Arrow Keys / WASD  - Move in cardinal directions                 ║
+        ║                                                                     ║
+        ║  COMMANDS:                                                          ║
+        ║    H            - Show this help screen                             ║
+        ║    R            - Rest and recover HP                               ║
+        ║    Q            - Quit the game                                     ║
+        ║                                                                     ║
+        ║  OBJECTIVE:                                                         ║
+        ║    Navigate the dungeon, collect gold, and survive!                 ║
+        ║    Avoid enemies and find your way deeper into the depths.          ║
+        ║                                                                     ║
+        ║  SYMBOLS:                                                           ║
+        ║    @            - You (the player)                                  ║
+        ║    *            - Gold                                              ║
+        ║    !            - Potion                                            ║
+        ║    /            - Weapon                                            ║
+        ║    G/O/T        - Enemies (Goblin, Orc, Troll)                      ║
+        ║    . / # / +    - Walkables (Floor, Tunnel, Door)                   ║
+        ║    | - / walls  - Walls (not walkable)                              ║
+        ║    >            - Staricase (touch to go to next lvl)               ║                                                                           
+        ║                                                                     ║
+        ║  Press H or ESCAPE to return to the game...                         ║
+        ║                                                                     ║
+        ╚═════════════════════════════════════════════════════════════════════╝
+
+        """";
 
     public HelpScene(Game game, Scene previousScene)
     {
