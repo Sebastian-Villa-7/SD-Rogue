@@ -3,10 +3,11 @@ using RogueLib.Engine;
 using RogueLib.Utilities;
 using SandBox01.Actors;
 using SandBox01.Levels;
+using SandBox01.Levels.Potions;
+using SandBox01.Levels.Weapons;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SandBox01.Levels.Potions;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace RlGameNS;
@@ -62,6 +63,7 @@ public class Level : Scene
         registerCommandsWithScene();
         spreadGold();
         spreadPotions();
+        spreadWeapons();
 
         _enemies = new List<Enemy>();
         _combat = new Combat();
@@ -105,6 +107,30 @@ public class Level : Scene
             }
 
             _item.Add(potion);
+        }
+    }
+
+    private void spreadWeapons()
+    {
+        var rng = new Random();
+        var weaponCount = rng.Next(2, 5);  // 3-6 weapons per level
+        var validFloorTiles = _floor.ToList();
+
+        // Define weapon types
+        var weaponTypes = new[]
+        {
+        ("Sword", 3, ConsoleColor.White),
+        ("Axe", 5, ConsoleColor.DarkRed),
+        ("Dagger", 2, ConsoleColor.Gray)
+    };
+
+        for (int i = 0; i < weaponCount && validFloorTiles.Any(); i++)
+        {
+            var pos = validFloorTiles[rng.Next(validFloorTiles.Count)];
+            var (type, damage, color) = weaponTypes[rng.Next(weaponTypes.Length)];
+
+            var weapon = new Weapon(pos, type, damage, color);
+            _item.Add(weapon);
         }
     }
 
@@ -302,9 +328,21 @@ public class Level : Scene
             if (itemHere != null)
             {
                 if (itemHere is Gold gold)
+                {
                     _player.Gold += gold.Amount;
+                }
                 else if (itemHere is Potion potion)
+                {
                     potion.ApplyEffect(_player as Rogue);
+                }
+                else if (itemHere is Weapon weapon)
+                {
+                    if (_player is Rogue rogue)
+                    {
+                        rogue.EquipWeapon(weapon);
+                        MessageLog.Add($"You picked up {weapon.Name}!");
+                    }
+                }
 
                 _item.Remove(itemHere);
             }

@@ -1,4 +1,5 @@
 using RogueLib.Utilities;
+using SandBox01.Levels.Weapons;
 
 namespace SandBox01.Levels;
 
@@ -10,9 +11,15 @@ public class Rogue : Player
     private int _armorBonus = 0;
     private int _armorBonusTurnsLeft = 0;
 
+    // Equipment
+    public Weapon? EquippedWeapon { get; set; }
+
     // Override to add the buff
     public override int Strength => _str + _strengthBonus;
     public override int Armor => _arm + _armorBonus;
+
+    // Override Attack to include weapon damage
+    public override int Attack => _str + _strengthBonus + (EquippedWeapon?.DamageBonus ?? 0);
 
     public void AddStrengthBuff(int bonus, int duration)
     {
@@ -32,6 +39,20 @@ public class Rogue : Player
         _hp = Math.Min(_hp + amount, _maxHp);
         int actualHeal = _hp - oldHp;
     }
+
+    // Equip a weapon
+    public void EquipWeapon(Weapon newWeapon)
+    {
+        EquippedWeapon = newWeapon;
+    }
+
+    // Updated HUD to show equipped weapon
+    public override string HUD =>
+        $"Lvl:{_level} G:{_gold} HP:{_hp}/{_maxHp} " +
+        $"Str:{Strength}(+{_strengthBonus}) " +
+        $"Arm:{Armor}(+{_armorBonus}) " +
+        $"Wpn:{(EquippedWeapon?.WeaponType?[..2] ?? "--")} " +
+        $"Turn:{_turn}";
 
     public override void Update()
     {

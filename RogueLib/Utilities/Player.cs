@@ -34,7 +34,7 @@ public abstract class Player : IActor, IDrawable
         set => _gold = value;
     }
 
-    public int Attack => _str;
+    public virtual int Attack => _str;
     public bool IsDead => _hp <= 0;
 
     public Player()
