@@ -7,9 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using SandBox01.Levels.Potions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using TileSet = System.Collections.Generic.HashSet<RogueLib.Utilities.Vector2>;
 
 namespace RlGameNS;
@@ -36,20 +33,18 @@ public class Level : Scene
     protected int _senseRadius = 4;
 
     // --- Tile Sets -----
-    // used to keep track of state of tiles on the map
-    protected TileSet _walkables; // walkable tiles 
+    protected TileSet _walkables;
     protected TileSet _floor;
     protected TileSet _tunnel;
     protected TileSet _door;
-    protected TileSet _decor; // walls and other decorations, always visible once discovered
+    protected TileSet _decor;
+    protected TileSet _discovered;
+    protected TileSet _inFov;
 
-    protected TileSet _discovered; // tiles the player has seen
-    protected TileSet _inFov;      // current fov of player
-    private bool _waitingForKey = false;
-
+    // --- Game Objects ---
     protected List<Item> _item;
-    private Combat _combat;
     protected List<Enemy> _enemies;
+    private Combat _combat;
 
     public Level(Player p, string map, Game game)
     {
@@ -57,7 +52,7 @@ public class Level : Scene
             throw new ArgumentNullException("game, player, or map cannot be null");
 
         _player = p;
-        _player.Pos = new Vector2(4, 12); // random, or at stairs
+        _player.Pos = new Vector2(4, 12);
         _map = map;
         _game = game;
         _item = new List<Item>();
@@ -66,10 +61,11 @@ public class Level : Scene
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
-        _enemies = new List<Enemy>();
-        spawnEnemies();
-        _combat = new Combat();
         spreadPotions();
+
+        _enemies = new List<Enemy>();
+        _combat = new Combat();
+        spawnEnemies();
     }
 
     private void spreadGold()
@@ -86,15 +82,13 @@ public class Level : Scene
     private void spreadPotions()
     {
         var rng = new Random();
-        var hm = rng.Next(5, 10);  
+        var hm = rng.Next(5, 10);
         var validFloorTiles = _floor.ToList();
 
         for (int i = 0; i < hm && validFloorTiles.Any(); i++)
         {
             var pos = validFloorTiles[rng.Next(validFloorTiles.Count)];
-
-            // Randomly choose potion type
-            int potionType = rng.Next(3);  // 0 = Strength, 1 = Shield, 2 = HP
+            int potionType = rng.Next(3);
 
             Potion potion;
             switch (potionType)
@@ -112,6 +106,39 @@ public class Level : Scene
 
             _item.Add(potion);
         }
+    }
+
+    private void spawnEnemies()
+    {
+        var rng = new Random();
+        var minDistance = 10;
+
+        for (int i = 0; i < 3; i++)
+        {
+            Vector2 pos;
+            do
+            {
+                pos = _floor.ElementAt(rng.Next(_floor.Count));
+            } while ((pos - _player!.Pos).KingLength < minDistance);
+            _enemies.Add(new Goblin(pos));
+        }
+
+        for (int i = 0; i < 2; i++)
+        {
+            Vector2 pos;
+            do
+            {
+                pos = _floor.ElementAt(rng.Next(_floor.Count));
+            } while ((pos - _player!.Pos).KingLength < minDistance);
+            _enemies.Add(new Orc(pos));
+        }
+
+        Vector2 trollPos;
+        do
+        {
+            trollPos = _floor.ElementAt(rng.Next(_floor.Count));
+        } while ((trollPos - _player!.Pos).KingLength < minDistance);
+        _enemies.Add(new Troll(trollPos));
     }
 
     protected void updateDiscovered()
@@ -133,22 +160,15 @@ public class Level : Scene
         updateDiscovered();
         _player!.Update();
 
-        foreach (var enemy in _enemies.ToList())
+        foreach (var e in _enemies.ToList())
         {
-            enemy.Update();
-            enemy.Act(_player!.Pos, _walkables);
-
-            // check if enemy moved into player tile
-            if (enemy.Pos == _player!.Pos)
-            {
-                _combat.EnemyAttacks(enemy, _player);
-            }
+            e.Update();
+            e.Act(_player!.Pos, _walkables);
         }
 
-        // check player death
         if (_player.IsDead)
         {
-            MessageLog.Add("You died!");
+            _game!.CurrentLevel = new RipScene(_game);
             _levelActive = false;
         }
     }
@@ -157,62 +177,39 @@ public class Level : Scene
     {
         disp.Draw(MessageLog.Message, new Vector2(0, 0), ConsoleColor.Yellow);
 
-        // Draw all discovered tiles in dark gray
         disp.fDraw(_discovered, _map, ConsoleColor.DarkGray);
-
-        // Draw current FOV tiles in bright gray on top (painter's algorithm)
         disp.fDraw(_inFov, _map, ConsoleColor.Gray);
 
         var rng = new Random();
         if (_player.Turn % 5 == 0)
             _player._color = (ConsoleColor)rng.Next(10, 16);
         _player!.Draw(disp);
-        // disp.Draw(_player!.Glyph, _player!.Pos, ConsoleColor.Cyan);
 
         drawItems(disp);
         drawEnemies(disp);
         disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+
     }
 
     public override void DoCommand(Command command)
     {
-        if (_waitingForKey)
-        {
-            _waitingForKey = false;
-            return;
-        }
-        // player ctl  
         if (command.Name == "up")
-        {
             MovePlayer(Vector2.N);
-        }
         else if (command.Name == "down")
-        {
             MovePlayer(Vector2.S);
-        }
         else if (command.Name == "left")
-        {
             MovePlayer(Vector2.W);
-        }
         else if (command.Name == "right")
-        {
             MovePlayer(Vector2.E);
-        }
         else if (command.Name == "rest")
-        {
-            _player.Rest();
-            _player.Update();
-        }
+            PlayerRests();
         else if (command.Name == "help")
         {
-            // Switch to help scene
             var helpScene = new HelpScene(_game!, this);
             _game!.CurrentLevel = helpScene;
         }
         else if (command.Name == "quit")
-        {
             _levelActive = false;
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -222,9 +219,7 @@ public class Level : Scene
         foreach (var item in _item)
         {
             if (_discovered.Contains(item.Pos))
-            {
                 item.Draw(disp);
-            }
         }
     }
 
@@ -239,16 +234,6 @@ public class Level : Scene
 
     private void initMapTileSets(string map)
     {
-        var lines = map.Split('\n');
-
-        // ------ rules for map ------
-        // . - floor, walkable and transparent.
-        // + - door, walkable and transparent // # - tunnel, walkable and transparent
-        // ' ' - solid stone, not walkable, not transparent.
-        // '|' - wall, not walkable, not transparent, but discoverable.'
-        //  others are treated the same as wall.
-        // tunnel, wall, and doorways are decor, once discovered they are visible.
-
         _floor = new TileSet();
         _tunnel = new TileSet();
         _door = new TileSet();
@@ -263,25 +248,7 @@ public class Level : Scene
         }
 
         _walkables = _floor.Union(_tunnel).Union(_door).ToHashSet();
-
-        //      for (int row = 0; row < lines.Length; ++row) {
-        //         for (int col = 0; col < lines[row].Length; ++col) {
-        //            char tile = lines[row][col];
-        //
-        //            if (tile == '.' || tile == '+' || tile == '#') {
-        //               _walkables.Add(new Vector2(col, row));
-        //               _decor.Add(new Vector2(col, row));
-        //            } else if (tile != ' ') {
-        //               _decor.Add(new Vector2(col, row));
-        //            }
-        //         }
-        //      }
     }
-
-    // ------------------------------------------------------
-    // Commands 
-    // ------------------------------------------------------
-
 
     private void registerCommandsWithScene()
     {
@@ -298,63 +265,51 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.D, "right");
 
         RegisterCommand(ConsoleKey.R, "rest");
-
         RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
     }
 
-
     public void MovePlayer(Vector2 delta)
     {
         var newPos = _player!.Pos + delta;
-
-        // check if there is an enemy on the target tile
         var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
 
         if (enemy != null)
         {
-            _combat.PlayerAttacks(_player, enemy);
+            var rng = new Random();
 
-            if (enemy.IsDead)
+            if (rng.Next(2) == 0)
             {
-                _enemies.Remove(enemy);
+                _combat.PlayerAttacks(_player, enemy);
+                if (enemy.IsDead)
+                    _enemies.Remove(enemy);
             }
             else
             {
-                // enemy attacks back if still alive
                 _combat.EnemyAttacks(enemy, _player);
             }
 
-            _waitingForKey = true;
+            if (_player.IsDead)
+            {
+                _game!.CurrentLevel = new RipScene(_game);
+                _levelActive = false;
+            }
         }
         else if (_walkables.Contains(newPos))
         {
-            Item? itemHere = null;
-            foreach (var item in _item)
-            {
-                if (item.Pos == newPos)
-                {
-                    itemHere = item;
-                    break;
-                }
-            }
-
+            // check for items
+            var itemHere = _item.FirstOrDefault(i => i.Pos == newPos);
             if (itemHere != null)
             {
                 if (itemHere is Gold gold)
-                {
-                    if (_player is Rogue rogue)
-                        _player.Gold += gold.Amount;
-                }
+                    _player.Gold += gold.Amount;
                 else if (itemHere is Potion potion)
-                {
-                    if (_player is Rogue rogue)
-                        potion.ApplyEffect(rogue);
-                }
+                    potion.ApplyEffect(_player as Rogue);
 
                 _item.Remove(itemHere);
             }
 
+            // move player
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
             _walkables.Remove(newPos);
@@ -363,24 +318,29 @@ public class Level : Scene
         }
     }
 
-    private void spawnEnemies()
+    private void PlayerRests()
     {
-        var rng = new Random();
+        _player!.Rest();
+        _player.Update();
 
-        for (int i = 0; i < 3; i++)
+        foreach (var enemy in _enemies.ToList())
         {
-            var pos = _floor.ElementAt(rng.Next(_floor.Count));
-            _enemies.Add(new Goblin(pos));
+            enemy.Update();
+
+            if ((enemy.Pos - _player!.Pos).KingLength == 1)
+            {
+                _combat.EnemyAttacks(enemy, _player);
+                break;
+            }
+
+            enemy.Act(_player!.Pos, _walkables);
         }
 
-        for (int i = 0; i < 2; i++)
+        if (_player.IsDead)
         {
-            var pos = _floor.ElementAt(rng.Next(_floor.Count));
-            _enemies.Add(new Orc(pos));
+            _game!.CurrentLevel = new RipScene(_game);
+            _levelActive = false;
         }
-
-        var trollPos = _floor.ElementAt(rng.Next(_floor.Count));
-        _enemies.Add(new Troll(trollPos));
     }
 
     public void QuitLevel()

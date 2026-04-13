@@ -14,12 +14,12 @@ public abstract class Player : IActor, IDrawable
 
     protected int _level = 0;
     protected int _hp = 12;
-    protected int _str = 3;
+    protected int _str = 12;
     protected int _arm = 4;
     protected int _exp = 0;
     protected int _gold = 0;
     protected int _maxHp = 12;
-    protected int _maxStr = 4;
+    protected int _maxStr = 14;
     protected int _turn = 0;
     private int _restCounter = 0;
 
@@ -65,6 +65,12 @@ public abstract class Player : IActor, IDrawable
 
     public void Rest()
     {
+        if (_hp >= 5)
+        {
+            MessageLog.Add("Your wounds have closed, only a potion can help now!");
+            return;
+        }
+
         _restCounter++;
         MessageLog.Add($"You rest... ({_restCounter}/5)");
         if (_restCounter >= 5)
@@ -73,10 +79,6 @@ public abstract class Player : IActor, IDrawable
             {
                 _hp++;
                 MessageLog.Add("You feel better! HP +1");
-            }
-            else
-            {
-                MessageLog.Add("You are already at full health!");
             }
             _restCounter = 0;
         }
