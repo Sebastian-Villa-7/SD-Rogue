@@ -30,6 +30,7 @@ namespace RlGameNS;
 public class Level : Scene
 {
     // ---- level config ---- 
+    protected int _levelDepth = 1;
     protected string? _map;
     protected int _senseRadius = 4;
 
@@ -47,7 +48,12 @@ public class Level : Scene
     protected List<Enemy> _enemies;
     private Combat _combat;
 
-    public Level(Player p, string map, Game game)
+    public Level(Player p, Game game, int depth = 1) 
+        : this(p, DungeonLayoutManager.GetRandomLayout(), game, depth)
+    {
+
+    }
+     public Level(Player p, string map, Game game, int depth = 1)
     {
         if (game == null || p == null || map == null)
             throw new ArgumentNullException("game, player, or map cannot be null");
@@ -57,6 +63,7 @@ public class Level : Scene
         _map = map;
         _game = game;
         _item = new List<Item>();
+        _levelDepth = depth;
 
         initMapTileSets(map);
         updateDiscovered();
@@ -213,7 +220,7 @@ public class Level : Scene
 
         drawItems(disp);
         drawEnemies(disp);
-        disp.Draw(_player.HUD, new Vector2(0, 24), ConsoleColor.Green);
+        disp.Draw(_player.HUD, new Vector2(0, 39), ConsoleColor.Green);
 
     }
 
@@ -236,6 +243,11 @@ public class Level : Scene
         }
         else if (command.Name == "quit")
             _levelActive = false;
+        else if (command.Name == "descend")
+        {
+            var nextLevel = new Level(_player, _game, _levelDepth + 1);
+            _game!.CurrentLevel = nextLevel;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -293,6 +305,7 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.R, "rest");
         RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
+        RegisterCommand(ConsoleKey.OemPeriod, "descend");
     }
 
     public void MovePlayer(Vector2 delta)

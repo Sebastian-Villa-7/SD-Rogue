@@ -12,37 +12,30 @@ public class HelpScene : Scene
     private Game? _game;
 
     private string _helpText = """
-        ╔══════════════════════════════════════════════════════════════════════════════╗
-        ║                              ROGUE HELP MANUAL                               ║
-        ╠══════════════════════════════════════════════════════════════════════════════╣
-        ║                                                                              ║
-        ║  MOVEMENT:                                                                   ║
-        ║    Arrow Keys  - Move in cardinal directions                                 ║
-        ║    W/A/S/D     - Alternative movement controls                               ║
-        ║                                                                              ║
-        ║  COMMANDS:                                                                   ║
-        ║    H            - Show this help screen                                      |
-        ║    R            - Rest (press 5 times to recover 1 HP                        |
-        ║    Q            - Quit the game                                              ║
-        ║                                                                              ║
-        ║  OBJECTIVE:                                                                  ║
-        ║    Navigate the dungeon, collect gold, and survive!                          ║
-        ║    Avoid enemies and find your way deeper into the depths.                   ║
-        ║                                                                              ║
-        ║  SYMBOLS:                                                                    ║
-        ║    @            - You (the player)                                           ║
-        ║    *            - Gold                                                       |
-        ║    g            - Goblin (weak, fast)                                        |
-        |    o            - Orc (medium, chases when close)                            |
-        |    T            - Troll (slow, always chases)                                |
-        ║    .            - Floor (walkable)                                           ║
-        ║    #            - Tunnel (walkable)                                          ║
-        ║    +            - Door (walkable)                                            ║
-        ║    | - / walls  - Walls (not walkable)                                       ║
-        ║                                                                              ║
-        ║  Press ANY KEY to return to the game...                                      ║
-        ║                                                                              ║
-        ╚══════════════════════════════════════════════════════════════════════════════╝
+          MOVEMENT:                                                                   
+            Arrow Keys / WASD  - Move in cardinal directions                              
+                                                                                      
+          COMMANDS:                                                                   
+            H            - Show this help screen                                      
+            R            - Rest (press 5 times to recover 1 HP)                        
+            Q            - Quit the game                                              
+                                                                                      
+          OBJECTIVE: Navigate the dungeon, collect gold, and survive!                          
+            Avoid enemies and find your way deeper into the depths.                   
+                                                                                      
+          SYMBOLS:                                                                    
+            @            - You (the player)                                           
+            *            - Gold                                                       
+            g            - Goblin (weak, fast)                                        
+            o            - Orc (medium, chases when close)                            
+            T            - Troll (slow, always chases)                                
+            .            - Floor (walkable)                                           
+            #            - Tunnel (walkable)                                          
+            +            - Door (walkable)                                            
+            | - / walls  - Walls (not walkable)                                       
+                                                                                      
+          Press H or ESCAPE to return to the game...                                  
+        
         """;
 
     public HelpScene(Game game, Scene previousScene)

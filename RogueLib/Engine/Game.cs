@@ -6,7 +6,7 @@ namespace RogueLib.Engine;
 // ------------------------------------------------------- 
 // To create a new game inherit this class, 
 // attach a render window, a player and the first level  
-//
+// 
 // player 
 // window
 // level 
@@ -16,7 +16,7 @@ public class Game
 {
     // fixed size grid
     public const int width = 78;
-    public const int height = 25;
+    public const int height = 40;
 
     protected Scene? _currentLevel;
     public Scene? CurrentLevel
