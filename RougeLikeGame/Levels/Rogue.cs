@@ -26,6 +26,13 @@ public class Rogue : Player
         _armorBonusTurnsLeft = duration;
     }
 
+    public void Heal(int amount)
+    {
+        int oldHp = _hp;
+        _hp = Math.Min(_hp + amount, _maxHp);
+        int actualHeal = _hp - oldHp;
+    }
+
     public override void Update()
     {
         base.Update();

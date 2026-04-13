@@ -84,18 +84,20 @@ public class Level : Scene
             var pos = validFloorTiles[rng.Next(validFloorTiles.Count)];
 
             // Randomly choose potion type
-            int potionType = rng.Next(2);  // 0 = Strength, 1 = Shield
+            int potionType = rng.Next(3);  // 0 = Strength, 1 = Shield, 2 = HP
 
             Potion potion;
-            if (potionType == 0)
+            switch (potionType)
             {
-                // Strength potion: bonus 3-8, duration 15-30 turns
-                potion = new StrengthPotion(pos, rng.Next(3, 8), rng.Next(15, 30));
-            }
-            else
-            {
-                // Shield potion: bonus 2-5, duration 15-30 turns
-                potion = new ArmourPotion(pos, rng.Next(2, 5), rng.Next(15, 30));
+                case 0:
+                    potion = new StrengthPotion(pos, rng.Next(3, 8), rng.Next(15, 30));
+                    break;
+                case 1:
+                    potion = new ArmourPotion(pos, rng.Next(2, 5), rng.Next(15, 30));
+                    break;
+                default:
+                    potion = new HealthPotion(pos, rng.Next(5, 15));
+                    break;
             }
 
             _item.Add(potion);
