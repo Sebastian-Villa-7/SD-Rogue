@@ -16,7 +16,7 @@ namespace SandBox01.Actors
         Vector2.N, Vector2.S, Vector2.E, Vector2.W
         };
 
-        public Orc(Vector2 pos) : base(pos, 'o', ConsoleColor.DarkGreen, 12, 6) { }
+        public Orc(Vector2 pos) : base(pos, 'o', ConsoleColor.DarkGreen, 12, 5, "Orc") { }
         public override void Act(Vector2 playerPos, HashSet<Vector2> walkable)
         {
             var distanceToPlayer = (Pos - playerPos).KingLength;

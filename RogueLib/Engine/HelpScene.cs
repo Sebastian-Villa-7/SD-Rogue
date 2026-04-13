@@ -18,10 +18,11 @@ public class HelpScene : Scene
         ║                                                                              ║
         ║  MOVEMENT:                                                                   ║
         ║    Arrow Keys  - Move in cardinal directions                                 ║
-        ║    W/A/S/D     - Alternative movement controls                              ║
+        ║    W/A/S/D     - Alternative movement controls                               ║
         ║                                                                              ║
         ║  COMMANDS:                                                                   ║
-        ║    H            - Show this help screen                                      ║
+        ║    H            - Show this help screen                                      |
+        ║    R            - Rest (press 5 times to recover 1 HP                        |
         ║    Q            - Quit the game                                              ║
         ║                                                                              ║
         ║  OBJECTIVE:                                                                  ║
@@ -30,7 +31,10 @@ public class HelpScene : Scene
         ║                                                                              ║
         ║  SYMBOLS:                                                                    ║
         ║    @            - You (the player)                                           ║
-        ║    *            - Gold                                                       ║
+        ║    *            - Gold                                                       |
+        ║    g            - Goblin (weak, fast)                                        |
+        |    o            - Orc (medium, chases when close)                            |
+        |    T            - Troll (slow, always chases)                                |
         ║    .            - Floor (walkable)                                           ║
         ║    #            - Tunnel (walkable)                                          ║
         ║    +            - Door (walkable)                                            ║

@@ -14,7 +14,7 @@ namespace SandBox01.Actors
             Vector2.N, Vector2.S, Vector2.E, Vector2.W
         };
 
-        public Goblin(Vector2 pos) : base(pos, 'g', ConsoleColor.Green, 6, 3) { }
+        public Goblin(Vector2 pos) : base(pos, 'g', ConsoleColor.Green, 6, 3, "Goblin") { }
 
         public override void Act(Vector2 playerPos, HashSet<Vector2> walkable)
         {

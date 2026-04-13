@@ -8,7 +8,7 @@ namespace SandBox01.Actors
 {
     internal class Troll : Enemy
     {
-        public Troll(Vector2 pos) : base(pos, 'T', ConsoleColor.DarkRed, 20, 10) { }
+        public Troll(Vector2 pos) : base(pos, 'T', ConsoleColor.DarkRed, 20, 6, "Troll") { }
 
         public override void Act(Vector2 playerPos, HashSet<Vector2> walkable)
         {

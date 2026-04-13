@@ -1,7 +1,11 @@
 using RogueLib.Dungeon;
 using RogueLib.Engine;
 using RogueLib.Utilities;
+using SandBox01.Actors;
 using SandBox01.Levels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using SandBox01.Levels.Potions;
 using System;
 using System.Collections.Generic;
@@ -41,8 +45,11 @@ public class Level : Scene
 
     protected TileSet _discovered; // tiles the player has seen
     protected TileSet _inFov;      // current fov of player
+    private bool _waitingForKey = false;
 
     protected List<Item> _item;
+    private Combat _combat;
+    protected List<Enemy> _enemies;
 
     public Level(Player p, string map, Game game)
     {
@@ -59,6 +66,9 @@ public class Level : Scene
         updateDiscovered();
         registerCommandsWithScene();
         spreadGold();
+        _enemies = new List<Enemy>();
+        spawnEnemies();
+        _combat = new Combat();
         spreadPotions();
     }
 
@@ -122,13 +132,31 @@ public class Level : Scene
     {
         updateDiscovered();
         _player!.Update();
-        // foreach item update
-        // foreach NPC update 
-        // check for player death -- on death build RIP message
+
+        foreach (var enemy in _enemies.ToList())
+        {
+            enemy.Update();
+            enemy.Act(_player!.Pos, _walkables);
+
+            // check if enemy moved into player tile
+            if (enemy.Pos == _player!.Pos)
+            {
+                _combat.EnemyAttacks(enemy, _player);
+            }
+        }
+
+        // check player death
+        if (_player.IsDead)
+        {
+            MessageLog.Add("You died!");
+            _levelActive = false;
+        }
     }
 
     public override void Draw(IRenderWindow? disp)
     {
+        disp.Draw(MessageLog.Message, new Vector2(0, 0), ConsoleColor.Yellow);
+
         // Draw all discovered tiles in dark gray
         disp.fDraw(_discovered, _map, ConsoleColor.DarkGray);
 
@@ -148,6 +176,11 @@ public class Level : Scene
 
     public override void DoCommand(Command command)
     {
+        if (_waitingForKey)
+        {
+            _waitingForKey = false;
+            return;
+        }
         // player ctl  
         if (command.Name == "up")
         {
@@ -164,6 +197,11 @@ public class Level : Scene
         else if (command.Name == "right")
         {
             MovePlayer(Vector2.E);
+        }
+        else if (command.Name == "rest")
+        {
+            _player.Rest();
+            _player.Update();
         }
         else if (command.Name == "help")
         {
@@ -190,7 +228,14 @@ public class Level : Scene
         }
     }
 
-    private void drawEnemies(IRenderWindow disp) { }
+    private void drawEnemies(IRenderWindow disp)
+    {
+        foreach (var enemy in _enemies)
+        {
+            if (_inFov.Contains(enemy.Pos))
+                enemy.Draw(disp);
+        }
+    }
 
     private void initMapTileSets(string map)
     {
@@ -252,6 +297,8 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.RightArrow, "right");
         RegisterCommand(ConsoleKey.D, "right");
 
+        RegisterCommand(ConsoleKey.R, "rest");
+
         RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
     }
@@ -261,7 +308,26 @@ public class Level : Scene
     {
         var newPos = _player!.Pos + delta;
 
-        if (_walkables.Contains(newPos))
+        // check if there is an enemy on the target tile
+        var enemy = _enemies.FirstOrDefault(e => e.Pos == newPos);
+
+        if (enemy != null)
+        {
+            _combat.PlayerAttacks(_player, enemy);
+
+            if (enemy.IsDead)
+            {
+                _enemies.Remove(enemy);
+            }
+            else
+            {
+                // enemy attacks back if still alive
+                _combat.EnemyAttacks(enemy, _player);
+            }
+
+            _waitingForKey = true;
+        }
+        else if (_walkables.Contains(newPos))
         {
             Item? itemHere = null;
             foreach (var item in _item)
@@ -291,9 +357,30 @@ public class Level : Scene
 
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
-            _walkables.Remove(newPos); // new tile is now occupied
-            _walkables.Add(oldPos);    // old tile is now free
+            _walkables.Remove(newPos);
+            _walkables.Add(oldPos);
+            updateDiscovered();
         }
+    }
+
+    private void spawnEnemies()
+    {
+        var rng = new Random();
+
+        for (int i = 0; i < 3; i++)
+        {
+            var pos = _floor.ElementAt(rng.Next(_floor.Count));
+            _enemies.Add(new Goblin(pos));
+        }
+
+        for (int i = 0; i < 2; i++)
+        {
+            var pos = _floor.ElementAt(rng.Next(_floor.Count));
+            _enemies.Add(new Orc(pos));
+        }
+
+        var trollPos = _floor.ElementAt(rng.Next(_floor.Count));
+        _enemies.Add(new Troll(trollPos));
     }
 
     public void QuitLevel()
