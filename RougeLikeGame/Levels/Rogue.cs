@@ -48,7 +48,7 @@ public class Rogue : Player
 
     // Updated HUD to show equipped weapon
     public override string HUD =>
-        $"Lvl:{_level} G:{_gold} HP:{_hp}/{_maxHp} " +
+        $"G:{_gold} HP:{_hp}/{_maxHp} " +
         $"Str:{Strength}(+{_strengthBonus}) " +
         $"Arm:{Armor}(+{_armorBonus}) " +
         $"Wpn:{(EquippedWeapon?.WeaponType?[..2] ?? "--")} " +

@@ -29,12 +29,13 @@ public class HelpScene : Scene
         ║  SYMBOLS:                                                           ║
         ║    @            - You (the player)                                  ║
         ║    *            - Gold                                              ║
-        ║    !            - Potion                                            ║
-        ║    /            - Weapon                                            ║
+        ║    S/H/A        - Potions (Strength, Health, Armour)                ║
+        ║    /, ;         - Weapons (Sword, axe)                              ║
         ║    G/O/T        - Enemies (Goblin, Orc, Troll)                      ║
         ║    . / # / +    - Walkables (Floor, Tunnel, Door)                   ║
         ║    | - / walls  - Walls (not walkable)                              ║
-        ║    >            - Staricase (touch to go to next lvl)               ║                                                                           
+        ║    >            - Staricase (Touch to go to next lvl)               ║
+        ║    &            - The amulet (Touch to win)                         ║                                              
         ║                                                                     ║
         ║  Press H or ESCAPE to return to the game...                         ║
         ║                                                                     ║
