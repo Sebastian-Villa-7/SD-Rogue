@@ -48,6 +48,8 @@ public class Level : Scene
     protected List<Enemy> _enemies;
     private Combat _combat;
 
+    private bool _hasAmuletSpawned;
+
     public Level(Player p, Game game, int depth = 1) 
         : this(p, DungeonLayoutManager.GetRandomLayout(), game, depth)
     {
@@ -78,6 +80,26 @@ public class Level : Scene
         _enemies = new List<Enemy>();
         _combat = new Combat();
         spawnEnemies();
+
+        if (_levelDepth >= 25)
+        {
+            spawnAmulet();
+        }
+    }
+
+    private void spawnAmulet()
+    {
+        var rng = new Random();
+        Vector2 pos;
+
+        do
+        {
+            pos = _floor.ElementAt(rng.Next(_floor.Count));
+        } while (pos == _player!.Pos); 
+
+        _item.Add(new Amulet(pos));
+        _hasAmuletSpawned = true;
+        MessageLog.Add("You sense a powerful artifact somewhere on this level...");
     }
 
     private void spreadStairs()
@@ -265,6 +287,15 @@ public class Level : Scene
             var nextLevel = new Level(_player, _game, _levelDepth + 1);
             _game!.CurrentLevel = nextLevel;
         }
+        else if (command.Name == "win")
+        {
+            WinGame();
+        }
+    }
+    private void WinGame()
+    {
+        _game!.CurrentLevel = new VictoryScene(_game, this);
+        _levelActive = false;
     }
 
     // -------------------------------------------------------------------------
@@ -373,11 +404,18 @@ public class Level : Scene
                         MessageLog.Add($"You picked up {weapon.Name}!");
                     }
                 }
-                else if (itemHere is Stairs)  // ← Add this
+                else if (itemHere is Stairs)
                 {
                     MessageLog.Add("You descend deeper into the dungeon...");
                     var nextLevel = new Level(_player, _game, _levelDepth + 1);
                     _game!.CurrentLevel = nextLevel;
+                    return;
+                }
+
+                else if (itemHere is Amulet)
+                {
+                    MessageLog.Add("You have found the Amulet of Yendor! You win!");
+                    WinGame();
                     return;
                 }
                 _item.Remove(itemHere);
