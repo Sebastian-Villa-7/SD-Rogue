@@ -35,6 +35,7 @@ public static class DungeonLayoutManager
       """;
 
     public static string Layout2 = """
+
               ┌────────┐              ┌────────────┐
               │........│              │............│
               │........+##############+............│

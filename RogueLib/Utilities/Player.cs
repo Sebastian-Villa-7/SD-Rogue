@@ -44,7 +44,7 @@ public abstract class Player : IActor, IDrawable
     }
 
     public virtual string HUD =>
-       $"Level:{_level}  Gold: {_gold}  Hp: {_hp}({_maxHp})" +
+       $"  Gold: {_gold}  Hp: {_hp}({_maxHp})" +
        $"  Str: {Strength}({_maxStr})" +
        $"  Arm: {Armor}   Exp: {_exp}/{10} Turn: {_turn}";
 

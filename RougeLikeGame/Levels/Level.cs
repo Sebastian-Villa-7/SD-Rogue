@@ -235,7 +235,9 @@ public class Level : Scene
 
         drawItems(disp);
         drawEnemies(disp);
-        disp.Draw(_player.HUD, new Vector2(0, 39), ConsoleColor.Green);
+
+        string hud = $"Level: {_levelDepth} {_player.HUD}";
+        disp.Draw(hud, new Vector2(0, 39), ConsoleColor.Green);
 
     }
 
