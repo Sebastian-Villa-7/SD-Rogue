@@ -13,13 +13,16 @@ public class HelpScene : Scene
 
     private string _helpText = """"
         ╔═════════════════════════════════════════════════════════════════════╗
-        ║                         ROGUE HELP MANUAL                           ║
+        ║                         ROGUE HELP MANUAL TESTING                   ║
         ║  MOVEMENT:                                                          ║
         ║    Arrow Keys / WASD  - Move in cardinal directions                 ║
         ║                                                                     ║
         ║  COMMANDS:                                                          ║
         ║    H            - Show this help screen                             ║
         ║    R            - Rest and recover HP                               ║
+        ║    1            - Buy a Heal for 10 gold (HP must be below 5)       ║
+        ║    2            - Buy Strength for 30 gold (+3 for 20 turns)        ║
+        ║    3            - Buy Armour for 50 gold (+3 for 30 turns)          ║
         ║    Q            - Quit the game                                     ║
         ║                                                                     ║
         ║  OBJECTIVE:                                                         ║

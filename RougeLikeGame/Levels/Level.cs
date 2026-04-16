@@ -291,6 +291,12 @@ public class Level : Scene
         {
             WinGame();
         }
+        else if (command.Name == "buyHeal")
+            BuyHeal();
+        else if (command.Name == "buyStrength")
+            BuyStrength();
+        else if (command.Name == "buyArmour")
+            BuyArmour();
     }
     private void WinGame()
     {
@@ -354,6 +360,15 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.H, "help");
         RegisterCommand(ConsoleKey.Q, "quit");
         RegisterCommand(ConsoleKey.OemPeriod, "descend");
+
+        RegisterCommand(ConsoleKey.D1, "buyHeal");
+        RegisterCommand(ConsoleKey.NumPad1, "buyHeal");
+
+        RegisterCommand(ConsoleKey.D2, "buyStrength");
+        RegisterCommand(ConsoleKey.NumPad2, "buyStrength");
+
+        RegisterCommand(ConsoleKey.D3, "buyArmour");
+        RegisterCommand(ConsoleKey.NumPad3, "buyArmour");
     }
 
     public void MovePlayer(Vector2 delta)
@@ -434,6 +449,87 @@ public class Level : Scene
     {
         _player!.Rest();
         _player.Update();
+
+        foreach (var enemy in _enemies.ToList())
+        {
+            enemy.Update();
+
+            if ((enemy.Pos - _player!.Pos).KingLength == 1)
+            {
+                _combat.EnemyAttacks(enemy, _player);
+                break;
+            }
+
+            enemy.Act(_player!.Pos, _walkables);
+        }
+
+        if (_player.IsDead)
+        {
+            _game!.CurrentLevel = new RipScene(_game);
+            _levelActive = false;
+        }
+    }
+
+    private void BuyHeal()
+    {
+        Rogue rogue = (Rogue)_player!;
+
+        if (rogue.Hp >= 5)
+        {
+            MessageLog.Add("Your HP must be less than 5 to purchase a Heal.");
+            return;
+        }
+
+        if (rogue.Gold < 10)
+        {
+            MessageLog.Add("You don't have enough gold to purchase a Heal.");
+            return;
+        }
+
+        rogue.Gold -= 10;
+        rogue.Heal(1);
+        MessageLog.Add("You successfully purchased a Heal for 10 gold!");
+
+        ProcessBuyTurn();
+    }
+
+    private void BuyStrength()
+    {
+        Rogue rogue = (Rogue)_player!;
+
+        if (rogue.Gold < 30)
+        {
+            MessageLog.Add("You don't have enough gold to purchase Strength.");
+            return;
+        }
+
+        rogue.Gold -= 30;
+        rogue.AddStrengthBuff(3, 20);
+        MessageLog.Add("You successfully purchased Strength for 30 gold!");
+
+        ProcessBuyTurn();
+    }
+
+    private void BuyArmour()
+    {
+        Rogue rogue = (Rogue)_player!;
+
+        if (rogue.Gold < 50)
+        {
+            MessageLog.Add("You don't have enough gold to purchase Armour.");
+            return;
+        }
+
+        rogue.Gold -= 50;
+        rogue.AddArmourBuff(3, 30);
+        MessageLog.Add("You successfully purchased Armour for 50 gold!");
+
+        ProcessBuyTurn();
+    }
+
+    private void ProcessBuyTurn()
+    {
+        _player!.Update();
 
         foreach (var enemy in _enemies.ToList())
         {
