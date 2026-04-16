@@ -40,7 +40,6 @@ public class HelpScene : Scene
         ║    &            - The amulet (Touch to win)                         ║                                              
         ║                                                                     ║
         ║  Press H or ESCAPE to return to the game...                         ║
-        ║                                                                     ║
         ╚═════════════════════════════════════════════════════════════════════╝
 
         """";

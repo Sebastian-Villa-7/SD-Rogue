@@ -1,11 +1,12 @@
-﻿using RogueLib.Utilities;
+﻿using RogueLib.Interfaces;
+using RogueLib.Utilities;
 using System;
 
 using System.Text;
 
 namespace RogueLib.Dungeon
 {
-    public abstract class Enemy : IActor, IDrawable
+    public abstract class Enemy : IActor, IDrawable, IDamageable
     {
         public string Name { get; protected set; }
         public Vector2 Pos { get; set; }
@@ -15,6 +16,8 @@ namespace RogueLib.Dungeon
         public ConsoleColor Color { get; protected init; }
         public int Attack { get; protected set; }
         public bool IsDead => _hp <= 0;
+
+        public int Hp => throw new NotImplementedException();
 
         protected int _hp;
         protected int _turnCounter;
