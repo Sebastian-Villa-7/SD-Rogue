@@ -291,8 +291,6 @@ public class Level : Scene
         {
             WinGame();
         }
-        else if (command.Name == "buyHeal")
-            BuyHeal();
         else if (command.Name == "buyStrength")
             BuyStrength();
         else if (command.Name == "buyArmour")
@@ -361,14 +359,11 @@ public class Level : Scene
         RegisterCommand(ConsoleKey.Q, "quit");
         RegisterCommand(ConsoleKey.OemPeriod, "descend");
 
-        RegisterCommand(ConsoleKey.D1, "buyHeal");
-        RegisterCommand(ConsoleKey.NumPad1, "buyHeal");
+        RegisterCommand(ConsoleKey.D1, "buyStrength");
+        RegisterCommand(ConsoleKey.NumPad1, "buyStrength");
 
-        RegisterCommand(ConsoleKey.D2, "buyStrength");
-        RegisterCommand(ConsoleKey.NumPad2, "buyStrength");
-
-        RegisterCommand(ConsoleKey.D3, "buyArmour");
-        RegisterCommand(ConsoleKey.NumPad3, "buyArmour");
+        RegisterCommand(ConsoleKey.D2, "buyArmour");
+        RegisterCommand(ConsoleKey.NumPad2, "buyArmour");
     }
 
     public void MovePlayer(Vector2 delta)
@@ -470,28 +465,7 @@ public class Level : Scene
         }
     }
 
-    private void BuyHeal()
-    {
-        Rogue rogue = (Rogue)_player!;
-
-        if (rogue.Hp >= 5)
-        {
-            MessageLog.Add("Your HP must be less than 5 to purchase a Heal.");
-            return;
-        }
-
-        if (rogue.Gold < 10)
-        {
-            MessageLog.Add("You don't have enough gold to purchase a Heal.");
-            return;
-        }
-
-        rogue.Gold -= 10;
-        rogue.Heal(1);
-        MessageLog.Add("You successfully purchased a Heal for 10 gold!");
-
-        ProcessBuyTurn();
-    }
+    
 
     private void BuyStrength()
     {
