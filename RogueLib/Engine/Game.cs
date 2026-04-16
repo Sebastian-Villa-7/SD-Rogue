@@ -22,7 +22,11 @@ public class Game
     public Scene? CurrentLevel
     {
         get => _currentLevel;
-        set => _currentLevel = value;
+        set
+        {
+            _currentLevel = value;
+            if (_window is ScreenBuff sb) sb.ClearScreen();
+        }
     }
     protected bool _isQuit;
     protected IRenderWindow? _window;

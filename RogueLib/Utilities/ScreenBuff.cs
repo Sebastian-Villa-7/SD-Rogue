@@ -87,6 +87,13 @@ public class ScreenBuff : IRenderWindow
         }
     }
 
+    public void ClearScreen() 
+    { 
+        ClearBackBuffer(); 
+        ResetFront(); 
+        Console.Clear(); 
+    }
+
     // ==============================================================
     //            private implementation methods
     // ==============================================================
