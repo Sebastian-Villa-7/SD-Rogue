@@ -99,7 +99,7 @@ public class Level : Scene
 
         _item.Add(new Amulet(pos));
         _hasAmuletSpawned = true;
-        MessageLog.Add("You sense a powerful artifact somewhere on this level...");
+        MessageLog.Instance.Add("You sense a powerful artifact somewhere on this level...");
     }
 
     private void spreadStairs()
@@ -180,35 +180,21 @@ public class Level : Scene
 
     private void spawnEnemies()
     {
-        var rng = new Random();
-        var minDistance = 10;
+        var factories = new List<EnemyFactory>
+    {
+        new GoblinFactory(),
+        new GoblinFactory(),
+        new GoblinFactory(),
+        new OrcFactory(),
+        new OrcFactory(),
+        new TrollFactory()
+    };
 
-        for (int i = 0; i < 3; i++)
+        foreach (var factory in factories)
         {
-            Vector2 pos;
-            do
-            {
-                pos = _floor.ElementAt(rng.Next(_floor.Count));
-            } while ((pos - _player!.Pos).KingLength < minDistance);
-            _enemies.Add(new Goblin(pos));
+            var enemy = factory.SpawnEnemy(_floor, _player!.Pos, 10);
+            _enemies.Add(enemy);
         }
-
-        for (int i = 0; i < 2; i++)
-        {
-            Vector2 pos;
-            do
-            {
-                pos = _floor.ElementAt(rng.Next(_floor.Count));
-            } while ((pos - _player!.Pos).KingLength < minDistance);
-            _enemies.Add(new Orc(pos));
-        }
-
-        Vector2 trollPos;
-        do
-        {
-            trollPos = _floor.ElementAt(rng.Next(_floor.Count));
-        } while ((trollPos - _player!.Pos).KingLength < minDistance);
-        _enemies.Add(new Troll(trollPos));
     }
 
     protected void updateDiscovered()
@@ -245,7 +231,7 @@ public class Level : Scene
 
     public override void Draw(IRenderWindow? disp)
     {
-        disp.Draw(MessageLog.Message, new Vector2(0, 0), ConsoleColor.Yellow);
+        disp.Draw(MessageLog.Instance.Message, new Vector2(0, 0), ConsoleColor.Yellow);
 
         disp.fDraw(_discovered, _map, ConsoleColor.DarkGray);
         disp.fDraw(_inFov, _map, ConsoleColor.Gray);
@@ -377,13 +363,13 @@ public class Level : Scene
 
             if (rng.Next(2) == 0)
             {
-                _combat.PlayerAttacks(_player, enemy);
+                _combat.Attack(_player, enemy, true);
                 if (enemy.IsDead)
                     _enemies.Remove(enemy);
             }
             else
             {
-                _combat.EnemyAttacks(enemy, _player);
+                _combat.Attack(enemy, _player, false);
             }
 
             if (_player.IsDead)
@@ -394,7 +380,6 @@ public class Level : Scene
         }
         else if (_walkables.Contains(newPos))
         {
-            // check for items
             var itemHere = _item.FirstOrDefault(i => i.Pos == newPos);
             if (itemHere != null)
             {
@@ -411,27 +396,26 @@ public class Level : Scene
                     if (_player is Rogue rogue)
                     {
                         rogue.EquipWeapon(weapon);
-                        MessageLog.Add($"You picked up {weapon.Name}!");
+                        MessageLog.Instance.Add($"You picked up {weapon.Name}!");
                     }
                 }
                 else if (itemHere is Stairs)
                 {
-                    MessageLog.Add("You descend deeper into the dungeon...");
+                    MessageLog.Instance.Add("You descend deeper into the dungeon...");
                     var nextLevel = new Level(_player, _game, _levelDepth + 1);
                     _game!.CurrentLevel = nextLevel;
                     return;
                 }
-
                 else if (itemHere is Amulet)
                 {
-                    MessageLog.Add("You have found the Amulet of Yendor! You win!");
+                    MessageLog.Instance.Add("You have found the Amulet of Yendor! You win!");
                     WinGame();
                     return;
                 }
+
                 _item.Remove(itemHere);
             }
 
-            // move player
             var oldPos = _player!.Pos;
             _player!.Pos = newPos;
             _walkables.Remove(newPos);
@@ -451,7 +435,7 @@ public class Level : Scene
 
             if ((enemy.Pos - _player!.Pos).KingLength == 1)
             {
-                _combat.EnemyAttacks(enemy, _player);
+                _combat.Attack(enemy, _player, false); // enemy attacks resting player
                 break;
             }
 
@@ -465,7 +449,7 @@ public class Level : Scene
         }
     }
 
-    
+
 
     private void BuyStrength()
     {
@@ -473,13 +457,13 @@ public class Level : Scene
 
         if (rogue.Gold < 30)
         {
-            MessageLog.Add("You don't have enough gold to purchase Strength.");
+            MessageLog.Instance.Add("You don't have enough gold to purchase Strength.");
             return;
         }
 
         rogue.Gold -= 30;
         rogue.AddStrengthBuff(3, 20);
-        MessageLog.Add("You successfully purchased Strength for 30 gold!");
+        MessageLog.Instance.Add("You successfully purchased Strength for 30 gold!");
 
         ProcessBuyTurn();
     }
@@ -490,13 +474,13 @@ public class Level : Scene
 
         if (rogue.Gold < 50)
         {
-            MessageLog.Add("You don't have enough gold to purchase Armour.");
+            MessageLog.Instance.Add("You don't have enough gold to purchase Armour.");
             return;
         }
 
         rogue.Gold -= 50;
         rogue.AddArmourBuff(3, 30);
-        MessageLog.Add("You successfully purchased Armour for 50 gold!");
+        MessageLog.Instance.Add("You successfully purchased Armour for 50 gold!");
 
         ProcessBuyTurn();
     }
@@ -511,7 +495,7 @@ public class Level : Scene
 
             if ((enemy.Pos - _player!.Pos).KingLength == 1)
             {
-                _combat.EnemyAttacks(enemy, _player);
+                _combat.Attack(enemy, _player, false);
                 break;
             }
 

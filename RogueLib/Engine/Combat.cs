@@ -1,4 +1,5 @@
 ﻿using RogueLib.Dungeon;
+using RogueLib.Interfaces;
 using RogueLib.Utilities;
 
 namespace RogueLib.Engine;
@@ -6,38 +7,28 @@ namespace RogueLib.Engine;
 public class Combat
 {
     private readonly Random _rng = new Random();
-    private const int _missChance = 30;
+    private const int _playerMissChance = 20;
+    private const int _enemyMissChance = 40;
 
-    public void PlayerAttacks(Player player, Enemy enemy)
+    public void Attack(IDamageable attacker, IDamageable defender, bool isPlayer)
     {
-        if (IsMiss())
+        int missChance = isPlayer ? _playerMissChance : _enemyMissChance;
+
+        if (IsMiss(missChance))
         {
-            MessageLog.Add("You missed!");
+            MessageLog.Instance.Add($"{attacker.Name} missed!");
             return;
         }
 
-        var damage = _rng.Next(1, player.Attack);
-        enemy.TakeDamage(damage);
+        var damage = _rng.Next(1, Math.Max(2, attacker.Attack));
+        defender.TakeDamage(damage);
 
-        if (enemy.IsDead)
-            MessageLog.Add($"You killed the {enemy.Name} for {damage} damage!");
+        if (defender.IsDead)
+            MessageLog.Instance.Add($"{attacker.Name} killed {defender.Name} for {damage} damage!");
         else
-            MessageLog.Add($"You hit the {enemy.Name} for {damage} damage!");
+            MessageLog.Instance.Add($"{attacker.Name} hit {defender.Name} for {damage} damage!");
     }
 
-    public void EnemyAttacks(Enemy enemy, Player player)
-    {
-        if (IsMiss())
-        {
-            MessageLog.Add($"The {enemy.Name} missed!");
-            return;
-        }
-
-        var damage = _rng.Next(1, enemy.Attack);
-        player.TakeDamage(damage);
-        MessageLog.Add($"The {enemy.Name} hits you for {damage} damage!");
-    }
-
-    private bool IsMiss()
-        => _rng.Next(100) < _missChance;
+    private bool IsMiss(int chance)
+        => _rng.Next(100) < chance;
 }

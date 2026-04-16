@@ -1,11 +1,12 @@
 using RogueLib.Dungeon;
 using RogueLib.Engine;
+using RogueLib.Interfaces;
 using System;
 
 
 namespace RogueLib.Utilities;
 
-public abstract class Player : IActor, IDrawable
+public abstract class Player : IActor, IDrawable, IDamageable
 {
     public string Name { get; set; }
     public Vector2 Pos;
@@ -67,18 +68,18 @@ public abstract class Player : IActor, IDrawable
     {
         if (_hp >= 5)
         {
-            MessageLog.Add("Your wounds have closed, only a potion can help now!");
+            MessageLog.Instance.Add("Your wounds have closed, only a potion can help now!");
             return;
         }
 
         _restCounter++;
-        MessageLog.Add($"You rest... ({_restCounter}/5)");
+        MessageLog.Instance.Add($"You rest... ({_restCounter}/5)");
         if (_restCounter >= 5)
         {
             if (_hp < _maxHp)
             {
                 _hp++;
-                MessageLog.Add("You feel better! HP +1");
+                MessageLog.Instance.Add("You feel better! HP +1");
             }
             _restCounter = 0;
         }
