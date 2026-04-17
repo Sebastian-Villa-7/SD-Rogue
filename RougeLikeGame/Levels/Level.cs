@@ -157,16 +157,16 @@ public class Level : Scene
     private void spreadWeapons()
     {
         var rng = new Random();
-        var weaponCount = rng.Next(2, 5);  // 3-6 weapons per level
+        var weaponCount = rng.Next(2, 7);  // 2-6 weapons per level
         var validFloorTiles = _floor.ToList();
 
-        // Define weapon types
+        // Define weapon types (Tuple) lightweight data structure used to group multiple data elements of different types into a single unit
         var weaponTypes = new[]
         {
         ("Sword", 3, ConsoleColor.White),
         ("Axe", 5, ConsoleColor.DarkRed),
         ("Dagger", 2, ConsoleColor.Gray)
-    };
+        };
 
         for (int i = 0; i < weaponCount && validFloorTiles.Any(); i++)
         {
